@@ -7,8 +7,8 @@
   <title>My Todo List</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/bootstrap-social.css">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="/css/bootstrap-social.css">
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
@@ -21,11 +21,16 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
+          <% if(user) { %>
           <li class="nav-item">
-            <a class="nav-link" href="/register">Register</a>
+            <a class="nav-link <% if (page_name === 'boards') { %> active <% } %>" href="/<%= user._id %>/boards">Boards</a>
+          </li>
+          <% } %>
+          <li class="nav-item">
+            <a class="nav-link <% if (page_name === 'register') { %> active <% } %>" href="/register">Register</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/login">Login</a>
+            <a class="nav-link <% if (page_name === 'login') { %> active <% } %>" href="/login">Login</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/logout">Logout</a>

@@ -1,0 +1,38 @@
+<%- include('partials/forms-header') %>
+
+<h1>Future Boards Page</h1>
+
+<% if (user) { %>
+<h2>
+  Hello
+  <%= user.name %>
+</h2>
+<% } %>
+
+<div class="container">
+  <div class="row">
+    <% boards.forEach(function(board) { %>
+
+    <div class="card m-auto" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title centered">
+          <%= board.boardTitle %>
+        </h5>
+        <p class="card-text centered">
+          <%= board.boardDescription %>
+        </p>
+        <a href="#" class="card-link centered">Card link</a>
+      </div>
+    </div>
+    <% }) %>
+
+    <div class="card m-3" style="width: 18rem;">
+      <div class="card-body">
+        <a href="#">Add New Board</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<%- include('partials/forms-footer') %>

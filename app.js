@@ -34,8 +34,13 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
   username: String,
   password: String,
+  name: String,
   googleId: String,
-  facebookId: String
+  facebookId: String,
+  boards: [{
+    boardTitle: String,
+    boardDescription: String,
+  }]
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -63,7 +68,7 @@ passport.use(new GoogleStrategy({
     userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
   },
   function(accessToken, refreshToken, profile, cb) {
-    User.findOrCreate({ googleId: profile.id }, function(err, user) {
+    User.findOrCreate({ googleId: profile.id, name: profile.name.givenName }, function(err, user) {
       return cb(err, user);
     });
   }
@@ -75,7 +80,7 @@ passport.use(new FacebookStrategy({
     callbackURL: "http://localhost:3000/auth/facebook/todo"
   },
   function(accessToken, refreshToken, profile, cb) {
-    User.findOrCreate({ facebookId: profile.id }, function(err, user) {
+    User.findOrCreate({ facebookId: profile.id, name: profile.displayName }, function(err, user) {
       return cb(err, user);
     });
   }
@@ -83,21 +88,23 @@ passport.use(new FacebookStrategy({
 
 app.route('/')
   .get(function(req, res) {
-    res.render('home');
+    console.log(req.route.path);
+    res.render('home', { user: req.user, page_name: 'home' });
   });
 
 app.route('/register')
   .get(function(req, res) {
-    res.render('register');
+    console.log(req.route.path);
+    res.render('register', { user: req.user, page_name: 'register' });
   })
   .post(function(req, res) {
-    User.register({ username: req.body.username }, req.body.password, function(err, user) {
+    User.register({ username: req.body.username, name: req.body.name }, req.body.password, function(err, user) {
       if (err) {
         console.log(err);
         res.redirect('/register');
       } else {
         passport.authenticate('local')(req, res, function() {
-          res.redirect('/');
+          res.redirect('/home');
         });
       }
     });
@@ -105,7 +112,7 @@ app.route('/register')
 
 app.route('/login')
   .get(function(req, res) {
-    res.render('login');
+    res.render('login', { user: req.user, page_name: 'login' });
   })
   .post(function(req, res) {
     const user = new User({
@@ -119,7 +126,7 @@ app.route('/login')
         res.redirect('/login');
       } else {
         passport.authenticate('local')(req, res, function() {
-          res.redirect('/');
+          res.redirect('/home');
         });
       }
     });
@@ -138,7 +145,7 @@ app.get('/auth/google/todo',
   passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('/');
+    res.redirect('/home');
   });
 
 app.get('/auth/facebook',
@@ -148,7 +155,29 @@ app.get('/auth/facebook/todo',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('/');
+    res.redirect('/home');
+  });
+
+app.route('/home')
+  .get(function(req, res) {
+    if (req.isAuthenticated()) {
+      res.redirect('/' + req.user._id + '/boards');
+    } else {
+      res.redirect('/login');
+    }
+  });
+
+app.route('/:userId/boards')
+  .get(function(req, res) {
+    if (req.isAuthenticated()) {
+      if (req.params.userId == req.user._id) {
+        res.render('boards', { user: req.user, page_name: 'boards', boards: req.user.boards });
+      } else {
+        res.send('This is not your board. ADD ERROR PAGE IN FUTURE');
+      }
+    } else {
+      res.redirect('/login');
+    }
   });
 
 
