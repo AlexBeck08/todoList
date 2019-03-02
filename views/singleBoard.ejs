@@ -1,0 +1,13 @@
+<%- include('partials/forms-header') %>
+
+<h1>future single board view</h1>
+<h3><strong>
+    <%= boards[boardIndex].boardTitle %>
+  </strong></h3>
+<form action="/<%= user._id %>/boards/<%=boardIndex%>?_method=DELETE" method="POST">
+  <button type="submit" class="mt-2 card-link btn-block btn btn-danger" name=""><i class="fas fa-trash-alt"></i></button>
+</form>
+
+
+
+<%- include('partials/forms-footer') %>

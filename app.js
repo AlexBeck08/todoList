@@ -8,6 +8,7 @@ const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const findOrCreate = require('mongoose-findorcreate');
+var methodOverride = require('method-override');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 
@@ -17,6 +18,7 @@ const saltRounds = 10;
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -69,6 +71,7 @@ passport.use(new GoogleStrategy({
   },
   function(accessToken, refreshToken, profile, cb) {
     User.findOrCreate({ googleId: profile.id, name: profile.name.givenName }, function(err, user) {
+      console.log(profile);
       return cb(err, user);
     });
   }
@@ -88,13 +91,12 @@ passport.use(new FacebookStrategy({
 
 app.route('/')
   .get(function(req, res) {
-    console.log(req.route.path);
+
     res.render('home', { user: req.user, page_name: 'home' });
   });
 
 app.route('/register')
   .get(function(req, res) {
-    console.log(req.route.path);
     res.render('register', { user: req.user, page_name: 'register' });
   })
   .post(function(req, res) {
@@ -171,13 +173,66 @@ app.route('/:userId/boards')
   .get(function(req, res) {
     if (req.isAuthenticated()) {
       if (req.params.userId == req.user._id) {
-        res.render('boards', { user: req.user, page_name: 'boards', boards: req.user.boards });
+        res.render('boards', { user: req.user, page_name: 'boards', boards: req.user.boards, boardIndex: req.params.boardIndex });
       } else {
         res.send('This is not your board. ADD ERROR PAGE IN FUTURE');
       }
     } else {
       res.redirect('/login');
     }
+  })
+  .post(function(req, res) {
+    const newBoard = { boardTitle: req.body.boardTitle, boardDescription: req.body.boardDescription };
+    User.findOneAndUpdate({ _id: req.user._id }, { $push: { boards: newBoard } }, function(err, updatedUser) {
+      if (err) {
+        console.log(err);
+        res.send('there was an error');
+      } else {
+        res.redirect('/' + req.user._id + '/boards');
+      }
+    });
+  });
+
+
+
+app.route('/:userId/boards/:boardIndex')
+  .get(function(req, res) {
+    res.render('singleBoard', { user: req.user, page_name: 'singleBoard', boards: req.user.boards, boardIndex: req.params.boardIndex });
+  })
+  .patch(function(req, res) {
+    let boardIndex = req.params.boardIndex;
+    let currentBoardId = req.user.boards[boardIndex]._id;
+    let updatedBoard = { boardTitle: req.body.boardTitle, boardDescription: req.body.boardDescription };
+    console.log(req.user);
+    User.findOneAndUpdate({ _id: req.user._id, "boards._id": currentBoardId }, { $set: { 'boards.$': updatedBoard } }, function(err, updatedBoard) {
+      if (err) {
+        console.log(err);
+        res.send('there was an error');
+      } else {
+        res.redirect('/' + req.user._id + '/boards');
+      }
+    });
+  })
+  .delete(function(req, res) {
+    console.log(req.body);
+    let boardIndex = req.params.boardIndex;
+    let currentBoardId = req.user.boards[boardIndex]._id;
+    User.update({ _id: req.user._id }, {
+      $pull: { boards: { _id: currentBoardId } }
+    }, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.redirect('/' + req.user._id + '/boards');
+      }
+    });
+  });
+
+
+
+app.route('/:userId/boards/:boardIndex/edit')
+  .get(function(req, res) {
+    res.render('editBoard', { user: req.user, page_name: 'singleBoard', boards: req.user.boards, boardIndex: req.params.boardIndex });
   });
 
 

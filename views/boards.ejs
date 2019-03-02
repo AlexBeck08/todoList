@@ -4,31 +4,58 @@
 
 <% if (user) { %>
 <h2>
-  Hello
-  <%= user.name %>
+  What's Up,
+  <%= user.name %>?
 </h2>
 <% } %>
 
 <div class="container">
   <div class="row">
-    <% boards.forEach(function(board) { %>
 
-    <div class="card m-auto" style="width: 18rem;">
+    <% for(i=0; i < boards.length; i++) { %>
+    <div class="card mx-auto my-3" style="width: 18rem;">
       <div class="card-body">
         <h5 class="card-title centered">
-          <%= board.boardTitle %>
+          <%= boards[i].boardTitle %>
         </h5>
         <p class="card-text centered">
-          <%= board.boardDescription %>
+          <%= boards[i].boardDescription %>
         </p>
-        <a href="#" class="card-link centered">Card link</a>
+        <div class="container">
+          <div class="row">
+            <div class="col-5 m-auto">
+              <a class="btn card-link btn-primary btn-block" href="/<%= user._id %>/boards/<%=i%>"><i class="fas fa-external-link-square-alt"></i></a>
+            </div>
+            <div class="col-5 m-auto">
+              <a class="btn card-link btn-primary btn-block" href="/<%= user._id %>/boards/<%=i%>/edit"><i class="fas fa-cog"></i></a>
+            </div>
+
+          </div>
+
+        </div>
       </div>
     </div>
-    <% }) %>
+    <% } %>
 
-    <div class="card m-3" style="width: 18rem;">
+  </div>
+  <a class="btn btn-primary btn-block mt-4" data-toggle="collapse" href="#newBoardForm" role="button" aria-expanded="false" aria-controls="newBoardForm">Add New Board</a>
+</div>
+
+<div class="collapse" id="newBoardForm">
+  <div class="container mt-3">
+    <div class="card">
       <div class="card-body">
-        <a href="#">Add New Board</a>
+        <form action="/<%= user._id %>/boards" method="POST">
+          <div class="form-group">
+            <label for="boardTitle">Board Name</label>
+            <input type="text" class="form-control" name="boardTitle" id="boardTitle" placeholder="Enter Title">
+          </div>
+          <div class="form-group">
+            <label for="boardDescription">Board Description</label>
+            <input type="text" name="boardDescription" class="form-control" id="boardDescription" placeholder="Board Description">
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
       </div>
     </div>
   </div>
