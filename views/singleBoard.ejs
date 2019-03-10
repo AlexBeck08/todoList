@@ -2,12 +2,16 @@
 
 <div class="list-container backgroundImage" style="background-image: url(' <%=board.boardImage %>')">
 
-  <form action="/<%= userId %>/boards/<%=boardId%>?_method=DELETE" method="POST">
-    <button type="submit" class="mt-2 btn btn-danger" name=""><i class="fas fa-trash-alt"></i></button>
-  </form>
-  <h3><strong>
-      <%= board.boardTitle %>
-    </strong></h3>
+  <div class="boardHeader d-flex justify-content-between">
+    <h3 class="my-auto"><strong>
+        <%= board.boardTitle %>
+      </strong></h3>
+    <form action="/<%= userId %>/boards/<%=boardId%>?_method=DELETE" method="POST">
+      <button type="submit" class="my-auto btn btn-danger" name=""><i class="fas fa-trash-alt"></i></button>
+    </form>
+  </div>
+
+
 
 
   <% for(i=0; i < lists.length; i++) { %>
@@ -23,7 +27,7 @@
         </form>
       </div>
     </div>
-    <div class="container">
+    <div class="container listScroll">
       <div class="card-body">
         <% for(j=0; j < lists[i].cards.length; j++) { %>
         <div class="card-text my-3">

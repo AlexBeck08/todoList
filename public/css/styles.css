@@ -8,6 +8,7 @@
 
 .list-container {
   width: 100%;
+  height: calc(100vh - 56px);
   overflow: auto;
   white-space: nowrap;
 }
@@ -44,4 +45,15 @@
   background-color: grey;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+.boardHeader h3,
+.boardHeader form {
+  display: inline-block;
+  padding: 15px;
+}
+
+.listScroll {
+  max-height: calc(100vh - 246px);
+  overflow-x: auto;
 }
