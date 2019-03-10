@@ -1,3 +1,7 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
 .social-block {
   color: #fff;
 }
@@ -15,8 +19,8 @@
 
 .list {
   display: inline-block;
-  /* height: 1000px; */
-  width: 340px;
+  width: 90vw;
+  max-width: 420px;
   border: 1px solid gray;
   margin: 20px;
 }
@@ -47,7 +51,6 @@
   background-repeat: no-repeat;
 }
 
-.boardHeader h3,
 .boardHeader form {
   display: inline-block;
   padding: 15px;
@@ -56,4 +59,54 @@
 .listScroll {
   max-height: calc(100vh - 246px);
   overflow-x: auto;
+}
+
+.card-header p {
+  margin: auto 0 auto 10%;
+}
+
+.profilePicture {
+  border-radius: 40%;
+  max-height: 25px;
+}
+
+.boardTitle {
+  font-family: 'Indie Flower', cursive;
+  padding: 15px 15px 15px 10%;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.listScroll::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: #F5F5F5;
+}
+
+.listScroll::-webkit-scrollbar {
+  width: 12px;
+  background-color: #F5F5F5;
+}
+
+.listScroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+  background-color: slategrey;
+}
+
+.list-container::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: #F5F5F5;
+}
+
+.list-container::-webkit-scrollbar {
+  width: 12px;
+  background-color: #F5F5F5;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+  background-color: slategrey;
 }

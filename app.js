@@ -31,6 +31,8 @@ app.use(passport.session());
 
 mongoose.connect('mongodb+srv://admin-alex:' + process.env.MONGO_PASSWORD + '@cluster0-ebwqq.mongodb.net/todoUsersDB', { useNewUrlParser: true });
 
+// mongoose.connect('mongodb://localhost:27017/todoUsersDB', { useNewUrlParser: true });
+
 const Schema = mongoose.Schema;
 
 const ObjectId = Schema.Types.ObjectId;
@@ -61,6 +63,7 @@ const userSchema = new Schema({
   name: String,
   googleId: String,
   facebookId: String,
+  profilePicture: String,
   boards: [boardSchema]
 });
 
@@ -92,10 +95,12 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "https://calm-river-32251.herokuapp.com/auth/google/todo",
+    // callbackURL: 'http://localhost:3000/auth/google/todo',
     userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
   },
   function(accessToken, refreshToken, profile, cb) {
-    User.findOrCreate({ googleId: profile.id, name: profile.name.givenName }, function(err, user) {
+    console.log(profile.photos[0].value);
+    User.findOrCreate({ googleId: profile.id, name: profile.name.givenName, profilePicture: profile.photos[0].value }, function(err, user) {
       return cb(err, user);
     });
   }
@@ -105,6 +110,7 @@ passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: "https://calm-river-32251.herokuapp.com/auth/facebook/todo"
+    // callbackURL: 'http://localhost:3000/auth/facebook/todo'
   },
   function(accessToken, refreshToken, profile, cb) {
     User.findOrCreate({ facebookId: profile.id, name: profile.displayName }, function(err, user) {
