@@ -12,6 +12,9 @@
   },
   "author": "Alex Beck",
   "license": "ISC",
+  "engines": {
+    "node": "v10.15.1"
+  },
   "bugs": {
     "url": "https://github.com/AlexBeck08/todoList/issues"
   },

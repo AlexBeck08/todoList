@@ -29,7 +29,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb://localhost:27017/todoUsersDB', { useNewUrlParser: true });
+mongoose.connect('mongodb+srv://admin-alex:' + process.env.MONGO_PASSWORD + '@cluster0-ebwqq.mongodb.net/todoUsersDB', { useNewUrlParser: true });
 
 const Schema = mongoose.Schema;
 
@@ -480,7 +480,11 @@ app.route('/:userId/boards/:boardId/lists/:listId/cards/:cardId')
     });
   });
 
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
 
-app.listen(3000, function() {
+app.listen(port, function() {
   console.log("Todo List Server Listing Todos");
 });
