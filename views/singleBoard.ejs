@@ -1,14 +1,14 @@
 <%- include('partials/forms-header') %>
 
-<h1>future single board view</h1>
-<form action="/<%= userId %>/boards/<%=boardId%>?_method=DELETE" method="POST">
-  <button type="submit" class="mt-2 btn btn-danger" name=""><i class="fas fa-trash-alt"></i></button>
-</form>
-<h3><strong>
-    <%= board.boardTitle %>
-  </strong></h3>
+<div class="list-container backgroundImage" style="background-image: url(' <%=board.boardImage %>')">
 
-<div class="list-container">
+  <form action="/<%= userId %>/boards/<%=boardId%>?_method=DELETE" method="POST">
+    <button type="submit" class="mt-2 btn btn-danger" name=""><i class="fas fa-trash-alt"></i></button>
+  </form>
+  <h3><strong>
+      <%= board.boardTitle %>
+    </strong></h3>
+
 
   <% for(i=0; i < lists.length; i++) { %>
   <div class="card align-top list">
@@ -25,41 +25,42 @@
     </div>
     <div class="container">
       <div class="card-body">
-
         <% for(j=0; j < lists[i].cards.length; j++) { %>
         <div class="card-text my-3">
           <div class="card shadow">
-            <div class="card-body">
-              <div class="card-text text-wrap">
-                <%= lists[i].cards[j].cardTitle %>
+            <div class="card-body cardBody">
+              <div class="card-text text-wrap d-flex justify-content-between">
+
+                <p class="m-auto cardText">
+                  <%= lists[i].cards[j].cardTitle %>
+                </p>
+                <form class="my-auto" action="/<%= userId %>/boards/<%=boardId%>/lists/<%= lists[i]._id %>/cards/<%= lists[i].cards[j]._id %>?_method=DELETE" method="POST">
+                  <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash-alt cardDelete"></i></button>
+
+                </form>
               </div>
+
             </div>
           </div>
-          <% } %>
-
-
-
-          <a href="#">
-
-            <div class="card-text btn btn-block my-3">
-              <div class="card shadow">
-                <div class="card-body">
-                  <div class="card-text text-wrap">
-                    <form class="" action="" method="post">
-                      <button type="button" class="btn btn-block" data-toggle="modal" data-target="#newCardForm<%= i %>">
-                        Add New Item
-                      </button>
-                    </form>
-                  </div>
+        </div>
+        <% } %>
+        <a href="#">
+          <div class="card-text btn btn-block my-3">
+            <div class="card shadow">
+              <div class="card-body">
+                <div class="card-text text-wrap">
+                  <form class="" action="" method="post">
+                    <button type="button" class="btn btn-block" data-toggle="modal" data-target="#newCardForm<%= i %>">
+                      Add New Item
+                    </button>
+                  </form>
                 </div>
               </div>
             </div>
-          </a>
-
-        </div>
+          </div>
+        </a>
       </div>
     </div>
-
     <!-- Modal New Card -->
     <div class="modal fade" id="newCardForm<%= i %>" tabindex="-1" role="dialog" aria-labelledby="newCardFormTitle<%= i %>" aria-hidden="true" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -82,8 +83,6 @@
         </div>
       </div>
     </div>
-
-
     <!--  Modal Edit List -->
     <div class="modal fade" id="editListForm<%= i %>" tabindex="-1" role="dialog" aria-labelledby="editListFormTitle<%= i %>" aria-hidden="true" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -107,17 +106,14 @@
       </div>
     </div>
 
-    <% } %>
 
-    <div class="newListBtn align-top">
-      <button type="button" class="btn btn-secondary btn-lg btn-block" data-toggle="modal" data-target="#newListForm">
-        Add New List
-      </button>
-    </div>
   </div>
-
-
-
+  <% } %>
+  <div class="newListBtn align-top">
+    <button type="button" class="btn btn-secondary btn-lg btn-block" data-toggle="modal" data-target="#newListForm">
+      Add New List
+    </button>
+  </div>
   <!-- Modal new list -->
   <div class="modal fade" id="newListForm" tabindex="-1" role="dialog" aria-labelledby="newListFormTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -140,6 +136,5 @@
       </div>
     </div>
   </div>
-
 </div>
 <%- include('partials/forms-footer') %>

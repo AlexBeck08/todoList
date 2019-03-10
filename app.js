@@ -51,6 +51,7 @@ const boardSchema = new Schema({
   userId: { type: ObjectId, ref: 'User' },
   boardTitle: String,
   boardDescription: String,
+  boardImage: String,
   lists: [listSchema]
 });
 
@@ -216,6 +217,7 @@ app.route('/:userId/boards')
       userId: req.params.userId,
       boardTitle: req.body.boardTitle,
       boardDescription: req.body.boardDescription,
+      boardImage: req.body.boardImage
       // lists: []
     });
     Board.create(board, function(err, newBoard) {
@@ -262,7 +264,8 @@ app.route('/:userId/boards/:boardId')
     let boardId = req.params.boardId;
     let updatedBoard = {
       boardTitle: req.body.boardTitle,
-      boardDescription: req.body.boardDescription
+      boardDescription: req.body.boardDescription,
+      boardImage: req.body.boardImage
     };
     Board.findByIdAndUpdate(boardId, updatedBoard,
       function(err, updatedBoard) {
@@ -415,7 +418,6 @@ app.route('/:userId/boards/:boardId/lists/:listId/cards/new')
     Board.findOne({ _id: req.params.boardId }, function(err, foundBoard) {
       const list = foundBoard.lists.id(req.params.listId);
       list.cards.push(card);
-      console.log(list);
       foundBoard.save();
     });
 
@@ -434,7 +436,48 @@ app.route('/:userId/boards/:boardId/lists/:listId/cards/new')
         });
       }
     });
+  });
 
+app.route('/:userId/boards/:boardId/lists/:listId/cards/:cardId')
+  .delete(function(req, res) {
+    const listId = req.params.listId;
+    const cardId = req.params.cardId;
+    const boardId = req.params.boardId;
+
+    List.findById(listId, function(err, foundList) {
+      if (err) {
+        console.log(err);
+      } else {
+        foundList.cards.pull({ _id: cardId });
+        foundList.save(function(err) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      }
+    });
+    Card.findByIdAndDelete(cardId, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('deleted card');
+      }
+    });
+    Board.findById(boardId, function(err, foundBoard) {
+      if (err) {
+        console.log(err);
+      } else {
+        const foundList = foundBoard.lists.id(listId);
+        foundList.cards.pull({ _id: cardId });
+        foundBoard.save(function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            res.redirect('/' + req.user._id + '/boards/' + boardId);
+          }
+        });
+      }
+    });
   });
 
 
