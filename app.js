@@ -278,7 +278,7 @@ app.route('/:userId/boards/:boardId')
         if (err) {
           console.log(err);
         } else {
-          User.update({ 'boards._id': boardId }, { '$set': { 'boards.$.boardTitle': req.body.boardTitle, 'boards.$.boardDescription': req.body.boardDescription } }, function(err) {
+          User.update({ 'boards._id': boardId }, { '$set': { 'boards.$.boardTitle': req.body.boardTitle, 'boards.$.boardDescription': req.body.boardDescription, 'boards.$.boardImage': req.body.boardImage } }, function(err) {
             if (err) {
               console.log(err);
             } else {
