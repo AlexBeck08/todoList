@@ -1,13 +1,145 @@
 <%- include('partials/forms-header') %>
 
 <h1>future single board view</h1>
-<h3><strong>
-    <%= boards[boardIndex].boardTitle %>
-  </strong></h3>
-<form action="/<%= user._id %>/boards/<%=boardIndex%>?_method=DELETE" method="POST">
-  <button type="submit" class="mt-2 card-link btn-block btn btn-danger" name=""><i class="fas fa-trash-alt"></i></button>
+<form action="/<%= userId %>/boards/<%=boardId%>?_method=DELETE" method="POST">
+  <button type="submit" class="mt-2 btn btn-danger" name=""><i class="fas fa-trash-alt"></i></button>
 </form>
+<h3><strong>
+    <%= board.boardTitle %>
+  </strong></h3>
+
+<div class="list-container">
+
+  <% for(i=0; i < lists.length; i++) { %>
+  <div class="card align-top list">
+    <div class="card-header d-flex justify-content-between">
+      <%= lists[i].listTitle %>
+      <div>
+        <button type="button" class="btn" data-toggle="modal" data-target="#editListForm<%= i %>">
+          <i class="far fa-edit"></i>
+        </button>
+        <form class="deleteListForm" action="/<%= userId %>/boards/<%=boardId%>/lists/<%= lists[i]._id %>?_method=DELETE" method="POST">
+          <button type="submit" class="btn" name=""><i class="fas fa-trash"></i></button>
+        </form>
+      </div>
+    </div>
+    <div class="container">
+      <div class="card-body">
+
+        <% for(j=0; j < lists[i].cards.length; j++) { %>
+        <div class="card-text my-3">
+          <div class="card shadow">
+            <div class="card-body">
+              <div class="card-text text-wrap">
+                <%= lists[i].cards[j].cardTitle %>
+              </div>
+            </div>
+          </div>
+          <% } %>
 
 
 
+          <a href="#">
+
+            <div class="card-text btn btn-block my-3">
+              <div class="card shadow">
+                <div class="card-body">
+                  <div class="card-text text-wrap">
+                    <form class="" action="" method="post">
+                      <button type="button" class="btn btn-block" data-toggle="modal" data-target="#newCardForm<%= i %>">
+                        Add New Item
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal New Card -->
+    <div class="modal fade" id="newCardForm<%= i %>" tabindex="-1" role="dialog" aria-labelledby="newCardFormTitle<%= i %>" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="newCardFor<%= i %>">New Card</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="/<%= userId %>/boards/<%= boardId %>/lists/<%= lists[i]._id %>/cards/new" method="POST">
+              <div class="form-group">
+                <label for="cardTitle">Card Title</label>
+                <input type="text" class="form-control" placeholder="Enter Title" name="cardTitle">
+              </div>
+              <button type="submit" class="btn btn-primary">Add New List</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!--  Modal Edit List -->
+    <div class="modal fade" id="editListForm<%= i %>" tabindex="-1" role="dialog" aria-labelledby="editListFormTitle<%= i %>" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editListFormTitle<%= i %>">New List</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="/<%= user._id %>/boards/<%= boardId %>/lists/<%= lists[i]._id %>/edit?_method=PATCH" method="POST">
+              <div class="form-group">
+                <label for="listTitle">New List Title</label>
+                <input type="text" class="form-control" value="<%= lists[i].listTitle %>" name="listTitle">
+              </div>
+              <button type="submit" class="btn btn-primary">Update List</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% } %>
+
+    <div class="newListBtn align-top">
+      <button type="button" class="btn btn-secondary btn-lg btn-block" data-toggle="modal" data-target="#newListForm">
+        Add New List
+      </button>
+    </div>
+  </div>
+
+
+
+  <!-- Modal new list -->
+  <div class="modal fade" id="newListForm" tabindex="-1" role="dialog" aria-labelledby="newListFormTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newListFormTitle">Edit List</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="/<%= user._id %>/boards/<%= boardId %>/lists/new" method="POST">
+            <div class="form-group">
+              <label for="listTitle">List Title</label>
+              <input type="text" class="form-control" placeholder="Enter Title" name="listTitle">
+            </div>
+            <button type="submit" class="btn btn-primary">Add New List</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 <%- include('partials/forms-footer') %>

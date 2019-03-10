@@ -33,16 +33,34 @@ mongoose.connect('mongodb://localhost:27017/todoUsersDB', { useNewUrlParser: tru
 
 const Schema = mongoose.Schema;
 
+const ObjectId = Schema.Types.ObjectId;
+
+const cardSchema = new Schema({
+  listId: { type: ObjectId, ref: 'List' },
+  cardTitle: String,
+  date: { type: Date, default: Date.now }
+});
+
+const listSchema = new Schema({
+  boardId: { type: ObjectId, ref: 'Board' },
+  listTitle: String,
+  cards: [cardSchema]
+});
+
+const boardSchema = new Schema({
+  userId: { type: ObjectId, ref: 'User' },
+  boardTitle: String,
+  boardDescription: String,
+  lists: [listSchema]
+});
+
 const userSchema = new Schema({
   username: String,
   password: String,
   name: String,
   googleId: String,
   facebookId: String,
-  boards: [{
-    boardTitle: String,
-    boardDescription: String,
-  }]
+  boards: [boardSchema]
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -50,6 +68,12 @@ userSchema.plugin(findOrCreate);
 
 
 const User = mongoose.model('User', userSchema);
+
+const Board = mongoose.model('Board', boardSchema);
+
+const List = mongoose.model('List', listSchema);
+
+const Card = mongoose.model('Card', cardSchema);
 
 passport.use(User.createStrategy());
 
@@ -71,7 +95,6 @@ passport.use(new GoogleStrategy({
   },
   function(accessToken, refreshToken, profile, cb) {
     User.findOrCreate({ googleId: profile.id, name: profile.name.givenName }, function(err, user) {
-      console.log(profile);
       return cb(err, user);
     });
   }
@@ -171,9 +194,16 @@ app.route('/home')
 
 app.route('/:userId/boards')
   .get(function(req, res) {
+    const boardsEjsOptions = {
+      user: req.user,
+      page_name: 'boards',
+      boards: req.user.boards,
+      boardIndex: req.params.boardIndex
+    };
+
     if (req.isAuthenticated()) {
       if (req.params.userId == req.user._id) {
-        res.render('boards', { user: req.user, page_name: 'boards', boards: req.user.boards, boardIndex: req.params.boardIndex });
+        res.render('boards', boardsEjsOptions);
       } else {
         res.send('This is not your board. ADD ERROR PAGE IN FUTURE');
       }
@@ -182,59 +212,230 @@ app.route('/:userId/boards')
     }
   })
   .post(function(req, res) {
-    const newBoard = { boardTitle: req.body.boardTitle, boardDescription: req.body.boardDescription };
-    User.findOneAndUpdate({ _id: req.user._id }, { $push: { boards: newBoard } }, function(err, updatedUser) {
+    const board = new Board({
+      userId: req.params.userId,
+      boardTitle: req.body.boardTitle,
+      boardDescription: req.body.boardDescription,
+      // lists: []
+    });
+    Board.create(board, function(err, newBoard) {
       if (err) {
         console.log(err);
-        res.send('there was an error');
+      } else { console.log(newBoard); }
+    });
+    User.findOne({ _id: req.params.userId }, function(err, user) {
+      if (err) {
+        console.log(err);
       } else {
-        res.redirect('/' + req.user._id + '/boards');
+        user.boards.push(board);
+        user.save(function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            res.redirect('/' + req.params.userId + '/boards');
+          }
+        });
       }
     });
   });
 
 
 
-app.route('/:userId/boards/:boardIndex')
+app.route('/:userId/boards/:boardId')
+  // **************   SHOW ALL BOARDS ****************
   .get(function(req, res) {
-    res.render('singleBoard', { user: req.user, page_name: 'singleBoard', boards: req.user.boards, boardIndex: req.params.boardIndex });
+    let boardId = req.params.boardId;
+    Board.findById(boardId, function(err, foundBoard) {
+      const singleBoardEjsOptions = {
+        user: req.user,
+        userId: req.params.userId,
+        page_name: 'singleBoard',
+        board: foundBoard,
+        boardId: boardId,
+        lists: foundBoard.lists,
+      };
+      res.render('singleBoard', singleBoardEjsOptions);
+    });
   })
+  // *****************    EDIT A BOARD   *******************
   .patch(function(req, res) {
-    let boardIndex = req.params.boardIndex;
-    let currentBoardId = req.user.boards[boardIndex]._id;
-    let updatedBoard = { boardTitle: req.body.boardTitle, boardDescription: req.body.boardDescription };
-    console.log(req.user);
-    User.findOneAndUpdate({ _id: req.user._id, "boards._id": currentBoardId }, { $set: { 'boards.$': updatedBoard } }, function(err, updatedBoard) {
-      if (err) {
-        console.log(err);
-        res.send('there was an error');
-      } else {
-        res.redirect('/' + req.user._id + '/boards');
-      }
-    });
+    let boardId = req.params.boardId;
+    let updatedBoard = {
+      boardTitle: req.body.boardTitle,
+      boardDescription: req.body.boardDescription
+    };
+    Board.findByIdAndUpdate(boardId, updatedBoard,
+      function(err, updatedBoard) {
+        if (err) {
+          console.log(err);
+        } else {
+          User.update({ 'boards._id': boardId }, { '$set': { 'boards.$.boardTitle': req.body.boardTitle, 'boards.$.boardDescription': req.body.boardDescription } }, function(err) {
+            if (err) {
+              console.log(err);
+            } else {
+              res.redirect('/' + req.user._id + '/boards');
+            }
+          });
+        }
+      });
   })
+  //***************  DELETES A BOARD *******************8
   .delete(function(req, res) {
-    console.log(req.body);
-    let boardIndex = req.params.boardIndex;
-    let currentBoardId = req.user.boards[boardIndex]._id;
-    User.update({ _id: req.user._id }, {
-      $pull: { boards: { _id: currentBoardId } }
-    }, function(err) {
+    let boardId = req.params.boardId;
+    Board.findByIdAndDelete(boardId, function(err) {
       if (err) {
         console.log(err);
       } else {
-        res.redirect('/' + req.user._id + '/boards');
+        console.log('deleted board');
+      }
+    });
+    User.findById(req.params.userId, function(err, foundUser) {
+      if (err) {
+        console.log(err);
+      } else {
+        foundUser.boards.pull({ _id: boardId });
+        foundUser.save(function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            res.redirect('/' + req.user._id + '/boards');
+          }
+        });
       }
     });
   });
 
 
 
-app.route('/:userId/boards/:boardIndex/edit')
+app.route('/:userId/boards/:boardId/edit')
   .get(function(req, res) {
-    res.render('editBoard', { user: req.user, page_name: 'singleBoard', boards: req.user.boards, boardIndex: req.params.boardIndex });
+    let boardId = req.params.boardId;
+    Board.findById(boardId, function(err, foundBoard) {
+      let editBoardEjsOptions = {
+        user: req.user,
+        page_name: 'singleBoard',
+        board: foundBoard,
+        boardId: boardId
+      };
+      res.render('editBoard', editBoardEjsOptions);
+    });
   });
 
+app.route('/:userId/boards/:boardId/lists/new')
+  .post(function(req, res) {
+    let boardId = req.params.boardId;
+    Board.findById(boardId, function(err, foundBoard) {
+      const list = new List({
+        listTitle: req.body.listTitle,
+        boardId: boardId
+      });
+      List.create(list, function(err, newList) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(newList);
+        }
+      });
+      foundBoard.lists.push(list);
+      foundBoard.save(function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.redirect('/' + req.params.userId + '/boards/' + req.params.boardId);
+        }
+      });
+    });
+  });
+
+app.route('/:userId/boards/:boardId/lists/:listId/edit')
+  .patch(function(req, res) {
+    let boardId = req.params.boardId;
+    let listId = req.params.listId;
+    let updatedList = {
+      listTitle: req.body.listTitle,
+    };
+    List.findByIdAndUpdate(listId, updatedList,
+      function(err, updatedList) {
+        if (err) {
+          console.log(err);
+        } else {
+          Board.update({ 'lists._id': listId }, { '$set': { 'lists.$.listTitle': req.body.listTitle } }, function(err) {
+            if (err) {
+              console.log(err);
+            } else {
+              res.redirect('/' + req.user._id + '/boards/' + boardId);
+            }
+          });
+        }
+      });
+  });
+
+app.route('/:userId/boards/:boardId/lists/:listId')
+  .delete(function(req, res) {
+
+    let boardId = req.params.boardId;
+    let listId = req.params.listId;
+    List.findByIdAndDelete(listId, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('deleted List');
+      }
+    });
+    Board.findById(boardId, function(err, foundBoard) {
+      if (err) {
+        console.log(err);
+      } else {
+        foundBoard.lists.pull({ _id: listId });
+        foundBoard.save(function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            res.redirect('/' + req.user._id + '/boards/' + boardId);
+          }
+        });
+      }
+    });
+  });
+
+app.route('/:userId/boards/:boardId/lists/:listId/cards/new')
+  .post(function(req, res) {
+    const card = new Card({
+      listId: req.params.listId,
+      cardTitle: req.body.cardTitle,
+    });
+    Card.create(card, function(err, newCard) {
+      if (err) {
+        console.log(err);
+      } else {
+        // console.log(newCard);
+      }
+    });
+
+    Board.findOne({ _id: req.params.boardId }, function(err, foundBoard) {
+      const list = foundBoard.lists.id(req.params.listId);
+      list.cards.push(card);
+      console.log(list);
+      foundBoard.save();
+    });
+
+    List.findOne({ _id: req.params.listId }, function(err, foundList) {
+      if (err) {
+        console.log(err);
+      } else {
+        foundList.cards.push(card);
+        foundList.save(function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            // console.log(foundList.cards);
+            res.redirect('/' + req.params.userId + '/boards/' + req.params.boardId);
+          }
+        });
+      }
+    });
+
+  });
 
 
 app.listen(3000, function() {

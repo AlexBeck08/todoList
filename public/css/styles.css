@@ -5,3 +5,27 @@
 .centered {
   text-align: center;
 }
+
+.list-container {
+  width: 100%;
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.list {
+  display: inline-block;
+  /* height: 1000px; */
+  width: 400px;
+  border: 1px solid gray;
+  margin: 20px;
+}
+
+.newListBtn {
+  display: inline-block;
+  width: 400px;
+  margin: 20px;
+}
+
+.deleteListForm {
+  display: inline-block;
+}
