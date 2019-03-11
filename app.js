@@ -250,7 +250,7 @@ app.route('/:userId/boards')
 
 
 app.route('/:userId/boards/:boardId')
-  // **************   SHOW ALL BOARDS ****************
+  // **************   SHOW A BOARDS ****************
   .get(function(req, res) {
     let boardId = req.params.boardId;
     Board.findById(boardId, function(err, foundBoard) {
