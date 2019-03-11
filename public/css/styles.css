@@ -112,3 +112,17 @@ body {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
   background-color: slategrey;
 }
+
+.listBody {
+  padding-bottom: 15px;
+}
+
+.cardBody {
+  padding: .6rem;
+}
+
+@media (max-width: 420px) {
+  body {
+    font-size: .75rem;
+  }
+}
