@@ -126,3 +126,7 @@ body {
     font-size: .75rem;
   }
 }
+
+.modal .fade {
+  top: auto;
+}
