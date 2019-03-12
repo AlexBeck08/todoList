@@ -130,3 +130,8 @@ body {
 .modal .fade {
   top: auto;
 }
+
+.newListBtn {
+  width: 90%;
+  max-width: 420px;
+}
